@@ -1,0 +1,90 @@
+[
+  {
+    "board": "Z790-HERO",
+    "path": "Z790-HERO/components/HeroIpmiR5.efi",
+    "original_path": "analysis/hero_sensor_r5_20261108/USB/EFI/HERO/HeroIpmiR5.efi",
+    "bytes": 36864,
+    "sha256": "81494db8d84839ff3d0368765334e22cbc0b27c4fd9c234dcb792d45272484b4",
+    "status": "传感器 R5，实验组件"
+  },
+  {
+    "board": "Z790-HERO",
+    "path": "Z790-HERO/components/HeroIpmiP6.efi",
+    "original_path": "analysis/hero_p6_s23_20261108/HeroIpmiP6.efi",
+    "bytes": 704000,
+    "sha256": "1536d23d32c5787820bf61749df1a16bba7e99b755854f2cd4114f7e62e390cc",
+    "status": "P6 设置 S23，实验组件"
+  },
+  {
+    "board": "W790-ACE",
+    "path": "W790-ACE/components/AiTweakerLock1904.efi",
+    "original_path": "analysis/aitweaker_lock/ace_adaptation_20261108/flash_candidate05/lock_1904_candidate05/driver/build/AiTweakerLock1904.efi",
+    "bytes": 46080,
+    "sha256": "71b05ebe21fd0b4de496fc9684f57e4acc79431e38a403dec9017501605eca98",
+    "status": "CANDIDATE05 驱动，未完成整体实机验收"
+  },
+  {
+    "board": "W790E-SAGE-SE",
+    "path": "W790E-SAGE-SE/components/SageNative13RamTest09.efi",
+    "original_path": "analysis/aitweaker_lock/lock_sage_1904/review/flash_readiness/native13_split_candidate/installer_design04/ram_test09_delivery/packages/3a1def1697c50d1a/SageNative13RamTest09.efi",
+    "bytes": 187904,
+    "sha256": "3a1def1697c50d1a61b20fc205539fca24107d12891d62b2e971dd6ccde7d1b9",
+    "status": "NATIVE13 RAMTEST09，NOFLASH；封包验证不等于硬件批准"
+  },
+  {
+    "board": "W790E-SAGE-SE",
+    "path": "W790E-SAGE-SE/components/SAGE-N13-RAMTEST09-NOFLASH.iso",
+    "original_path": "analysis/aitweaker_lock/lock_sage_1904/review/flash_readiness/native13_split_candidate/installer_design04/ram_test09_delivery/packages/3a1def1697c50d1a/SAGE-N13-RAMTEST09-NOFLASH.iso",
+    "bytes": 16842752,
+    "sha256": "05dccec80c7ae1c831abc39dd5e0633a0d411584dd020a646cd2642195686d3d",
+    "status": "同一 RAMTEST09 的启动测试介质，hardware_execution=false"
+  },
+  {
+    "board": "W790E-SAGE-SE",
+    "path": "W790E-SAGE-SE/components/AiTweakerSplitProvider15.UNSIGNED.local.efi",
+    "original_path": "analysis/aitweaker_lock/lock_sage_1904/review/flash_readiness/native13_split_candidate/installer_design04/provider15_diagnostic09/build/AiTweakerSplitProvider15.UNSIGNED.local.efi",
+    "bytes": 61440,
+    "sha256": "d15438fde33bf0fada0a33f9f62a9ca8ff72cf21bb924ceaeca0bc75a0b0a5cf",
+    "status": "Provider15 / Diagnostic09，未签名测试组件"
+  },
+  {
+    "board": "W890E-SAGE-SE",
+    "path": "W890E-SAGE-SE/components/diagnostic_delta07-BOOTX64.EFI",
+    "original_path": "analysis/aitweaker_lock/lock_w890_sage/diagnostic_delta07/build/BOOTX64.EFI",
+    "bytes": 231424,
+    "sha256": "3918cbaea2559429a30bf8e78208b9df02c3a4a79ce4f1ea143e537a630dfcff",
+    "status": "Diagnostic Delta07，最新诊断产物，等待 QA"
+  },
+  {
+    "board": "W890E-SAGE-SE",
+    "path": "W890E-SAGE-SE/components/W890Runtime02.UNBOUND.TESTONLY.efi",
+    "original_path": "analysis/aitweaker_lock/lock_w890_sage/password_runtime02/build/W890Runtime02.UNBOUND.TESTONLY.efi",
+    "bytes": 39936,
+    "sha256": "ec718d44fd088b1fb241ced5602bbea8b71ea07798b8226d05e4af5c0c2c15d6",
+    "status": "Runtime02，UNBOUND / TESTONLY，不是可部署密码锁"
+  },
+  {
+    "board": "W890E-SAGE-SE",
+    "path": "W890E-SAGE-SE/components/W890Recovery03.IDENTITY_READONLY.efi",
+    "original_path": "analysis/aitweaker_lock/lock_w890_sage/password_recovery03/build/W890Recovery03.IDENTITY_READONLY.efi",
+    "bytes": 29696,
+    "sha256": "96dc509c8cc6b5db746b97f3a97562c8d2ab6b31f688ffc5e06cc1463f8760ff",
+    "status": "Recovery03，只读身份测试组件"
+  },
+  {
+    "board": "W890E-SAGE-SE",
+    "path": "W890E-SAGE-SE/components/W890Management04.UNBOUND.TESTONLY.efi",
+    "original_path": "analysis/aitweaker_lock/lock_w890_sage/management_live04/build/W890Management04.UNBOUND.TESTONLY.efi",
+    "bytes": 53248,
+    "sha256": "856740f204fac2a477d842a500ccd85427f07f5b3dfc0141b80ce1c6fff4e7a5",
+    "status": "Management04，UNBOUND / TESTONLY"
+  },
+  {
+    "board": "W890E-SAGE-SE",
+    "path": "W890E-SAGE-SE/components/W890-Installer04.TCG-ONLY.efi",
+    "original_path": "analysis/aitweaker_lock/lock_w890_sage/installer04/build/W890-Installer04.TCG-ONLY.efi",
+    "bytes": 3101184,
+    "sha256": "074f90ff6caef42bcda100ca9c96b9ba969fd25f3260ba23e8857104ee179e7e",
+    "status": "Installer04，仅限 TCG 模拟环境，不是实机安装器"
+  }
+]

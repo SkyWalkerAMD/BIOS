@@ -14,16 +14,18 @@
   },
   {
     "board": "W790-ACE",
-    "version": "1904 / CANDIDATE05",
-    "filename": "W790-ACE-1904-CANDIDATE05-ENGINEERING-NONOEM-NOT-FLASH-READY.CAP",
+    "version": "1904 / CANDIDATE05 / USB FlashBack 当前主线",
+    "filename": "01-CANDIDATE05-USB/PWW790A.CAP",
     "bytes": 67112960,
-    "sha256": "e330039ecd2c334c4f9d502589e7f9503000b34462a7e21f6b97b1b581794d08",
-    "status": "工程签名、非 OEM、NOT FLASH READY；本地数学验签不等于厂商更新接受或可恢复刷写。",
-    "original_path": "analysis/aitweaker_lock/ace_adaptation_20261108/flash_candidate05/engineering_signature/W790-ACE-1904-CANDIDATE05-ENGINEERING-NONOEM-NOT-FLASH-READY.CAP",
+    "sha256": "9b038c4eae111a985c5c5fef460f0874338d16764b0ead6f89a3e55c775f5455",
+    "status": "当前 USB FlashBack 实验候选；最终接受、原生 Setup 整体运行和可恢复刷写尚未完成验收。旧 e330 工程签名文件不是默认候选。",
+    "original_path": "analysis/aitweaker_lock/ace_adaptation_20261108/flash_candidate05/flashback_delivery/package/01-CANDIDATE05-USB/PWW790A.CAP",
     "baseline_sha256": "03e4330430b2510d5e9e5c9868ca64c730844992b82c6a272b815aef3d20bf29",
     "asset": "W790-ACE-latest-local-progress.zip",
-    "asset_bytes": 15682922,
-    "asset_sha256": "20b38479c900354d3902589b3f84745f14d3f8865ce73da7087a45ca88485fe1"
+    "asset_bytes": 31371453,
+    "asset_sha256": "1eed83f2321d8b22a56ca2b675e56e7730ad358776cffc29f46a15c8fb2174ef",
+    "recovery_sha256": "03e4330430b2510d5e9e5c9868ca64c730844992b82c6a272b815aef3d20bf29",
+    "superseded_engineering_sha256": "e330039ecd2c334c4f9d502589e7f9503000b34462a7e21f6b97b1b581794d08"
   },
   {
     "board": "W790E-SAGE-SE",
