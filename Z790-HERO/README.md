@@ -1,0 +1,166 @@
+# Z790 HERO
+
+HERO IPMI、传感器、原生菜单、远程 BIOS、库存与 PCIe 等研究与构建源码。
+
+当前分类含 **3,018 个原始源码文件**。
+
+**验证状态：** 较新的 R5/S23 CANDIDATE05 仍是离线候选；原始记录未确认最终 CAP 刷写、冷启动首次 SetupEnter、配置写入及恢复验收。
+
+## 源码入口
+
+- [analysis/analyze_hero_a2_log.py](analysis/analyze_hero_a2_log.py)
+- [analysis/analyze_hero_b1_log.py](analysis/analyze_hero_b1_log.py)
+- [analysis/analyze_hero_b2_003_log.py](analysis/analyze_hero_b2_003_log.py)
+- [analysis/analyze_hero_b2a_004_log.py](analysis/analyze_hero_b2a_004_log.py)
+- [analysis/analyze_hero_b2b_20261014_log.py](analysis/analyze_hero_b2b_20261014_log.py)
+- [analysis/analyze_hero_b2c_20261015_log.py](analysis/analyze_hero_b2c_20261015_log.py)
+- [analysis/analyze_hero_b2c_init_20261015_log.py](analysis/analyze_hero_b2c_init_20261015_log.py)
+- [analysis/build_hero_ipmi_fan_b2.py](analysis/build_hero_ipmi_fan_b2.py)
+- [analysis/build_hero_ipmi_fan_b2a.py](analysis/build_hero_ipmi_fan_b2a.py)
+- [analysis/build_hero_ipmi_fan_b2b.py](analysis/build_hero_ipmi_fan_b2b.py)
+- [analysis/build_hero_ipmi_fan_b2c.py](analysis/build_hero_ipmi_fan_b2c.py)
+- [analysis/build_hero_ipmi_init_b1.py](analysis/build_hero_ipmi_init_b1.py)
+- [analysis/build_hero_ipmi_probe.py](analysis/build_hero_ipmi_probe.py)
+- [analysis/build_hero_ipmi_probe_a2.py](analysis/build_hero_ipmi_probe_a2.py)
+- [analysis/build_sensor_r1.py](analysis/build_sensor_r1.py)
+- [analysis/fetch_hero_3107.py](analysis/fetch_hero_3107.py)
+- [analysis/hero15_ipmi_validation_20261108](analysis/hero15_ipmi_validation_20261108/)：2 个文件。
+- [analysis/hero15_p5_p6_forms_review_20261108](analysis/hero15_p5_p6_forms_review_20261108/)：2 个文件。
+- [analysis/hero15_rc5_live_20261108](analysis/hero15_rc5_live_20261108/)：16 个文件。
+- [analysis/hero_boot_s0](analysis/hero_boot_s0/)：6 个文件。
+- [analysis/hero_dashboard_20261108](analysis/hero_dashboard_20261108/)：17 个文件。
+- [analysis/hero_display_m1e](analysis/hero_display_m1e/)：15 个文件。
+- [analysis/hero_display_m1f](analysis/hero_display_m1f/)：17 个文件。
+- [analysis/hero_fan_apply_20261108](analysis/hero_fan_apply_20261108/)：4 个文件。
+- [analysis/hero_fan_followup_20261108](analysis/hero_fan_followup_20261108/)：3 个文件。
+- [analysis/hero_fan_mapping_20261108](analysis/hero_fan_mapping_20261108/)：5 个文件。
+- [analysis/hero_fan_mapping_v2_20261108](analysis/hero_fan_mapping_v2_20261108/)：5 个文件。
+- [analysis/hero_fan_rearm_v3_20261108](analysis/hero_fan_rearm_v3_20261108/)：7 个文件。
+- [analysis/hero_fan_rearm_v3b_20261108](analysis/hero_fan_rearm_v3b_20261108/)：11 个文件。
+- [analysis/hero_fw_i2c_20261108](analysis/hero_fw_i2c_20261108/)：20 个文件。
+- [analysis/hero_gop_compat_patch_20261102](analysis/hero_gop_compat_patch_20261102/)：12 个文件。
+- [analysis/hero_hardware_source_20261108](analysis/hero_hardware_source_20261108/)：26 个文件。
+- [analysis/hero_hii_m1c](analysis/hero_hii_m1c/)：7 个文件。
+- [analysis/hero_hii_m1d_kvm](analysis/hero_hii_m1d_kvm/)：16 个文件。
+- [analysis/hero_inventory_20261108](analysis/hero_inventory_20261108/)：172 个文件。
+- [analysis/hero_inventory_collect_20261108](analysis/hero_inventory_collect_20261108/)：81 个文件。
+- [analysis/hero_inventory_delivery_20261108](analysis/hero_inventory_delivery_20261108/)：21 个文件。
+- [analysis/hero_inventory_entry_review_20261108](analysis/hero_inventory_entry_review_20261108/)：1 个文件。
+- [analysis/hero_inventory_i5_20261108](analysis/hero_inventory_i5_20261108/)：342 个文件。
+- [analysis/hero_inventory_publish_20261108](analysis/hero_inventory_publish_20261108/)：49 个文件。
+- [analysis/hero_inventory_publish_i3a_20261108](analysis/hero_inventory_publish_i3a_20261108/)：64 个文件。
+- [analysis/hero_inventory_publish_i3b_20261108](analysis/hero_inventory_publish_i3b_20261108/)：60 个文件。
+- [analysis/hero_inventory_publish_i3d_20261108](analysis/hero_inventory_publish_i3d_20261108/)：61 个文件。
+- [analysis/hero_ipmi_a2_result](analysis/hero_ipmi_a2_result/)：1 个文件。
+- [analysis/hero_ipmi_b1_result](analysis/hero_ipmi_b1_result/)：1 个文件。
+- [analysis/hero_ipmi_b2_result_003](analysis/hero_ipmi_b2_result_003/)：1 个文件。
+- [analysis/hero_ipmi_b2a_result_004](analysis/hero_ipmi_b2a_result_004/)：1 个文件。
+- [analysis/hero_ipmi_b2b_result_20261014](analysis/hero_ipmi_b2b_result_20261014/)：1 个文件。
+- [analysis/hero_ipmi_b2c_init_result_20261015](analysis/hero_ipmi_b2c_init_result_20261015/)：1 个文件。
+- [analysis/hero_ipmi_b2c_result_20261015](analysis/hero_ipmi_b2c_result_20261015/)：1 个文件。
+- [analysis/hero_ipmi_complete_live_20261108](analysis/hero_ipmi_complete_live_20261108/)：12 个文件。
+- [analysis/hero_ipmi_continued_live_20261108](analysis/hero_ipmi_continued_live_20261108/)：7 个文件。
+- [analysis/hero_ipmi_fan_b2](analysis/hero_ipmi_fan_b2/)：8 个文件。
+- [analysis/hero_ipmi_fan_b2a](analysis/hero_ipmi_fan_b2a/)：9 个文件。
+- [analysis/hero_ipmi_fan_b2b](analysis/hero_ipmi_fan_b2b/)：10 个文件。
+- [analysis/hero_ipmi_fan_b2c](analysis/hero_ipmi_fan_b2c/)：11 个文件。
+- [analysis/hero_ipmi_flash_live_20261104](analysis/hero_ipmi_flash_live_20261104/)：3 个文件。
+- [analysis/hero_ipmi_flash_validation_20261104](analysis/hero_ipmi_flash_validation_20261104/)：141 个文件。
+- [analysis/hero_ipmi_init_b1](analysis/hero_ipmi_init_b1/)：8 个文件。
+- [analysis/hero_ipmi_p1](analysis/hero_ipmi_p1/)：30 个文件。
+- [analysis/hero_ipmi_p1_live_20261103](analysis/hero_ipmi_p1_live_20261103/)：2 个文件。
+- [analysis/hero_ipmi_p1b](analysis/hero_ipmi_p1b/)：29 个文件。
+- [analysis/hero_ipmi_p1c](analysis/hero_ipmi_p1c/)：30 个文件。
+- [analysis/hero_ipmi_p1c_live_20261103](analysis/hero_ipmi_p1c_live_20261103/)：2 个文件。
+- [analysis/hero_ipmi_p2](analysis/hero_ipmi_p2/)：51 个文件。
+- [analysis/hero_ipmi_p2_live_20261103](analysis/hero_ipmi_p2_live_20261103/)：3 个文件。
+- [analysis/hero_ipmi_p3](analysis/hero_ipmi_p3/)：72 个文件。
+- [analysis/hero_ipmi_p3_live_20261103](analysis/hero_ipmi_p3_live_20261103/)：3 个文件。
+- [analysis/hero_ipmi_p4](analysis/hero_ipmi_p4/)：2 个文件。
+- [analysis/hero_ipmi_p5](analysis/hero_ipmi_p5/)：43 个文件。
+- [analysis/hero_ipmi_p5_live_20261103](analysis/hero_ipmi_p5_live_20261103/)：4 个文件。
+- [analysis/hero_ipmi_p5_rea_review_20261103](analysis/hero_ipmi_p5_rea_review_20261103/)：28 个文件。
+- [analysis/hero_ipmi_p5_review_live_20261103](analysis/hero_ipmi_p5_review_live_20261103/)：3 个文件。
+- [analysis/hero_ipmi_p6_20261104](analysis/hero_ipmi_p6_20261104/)：187 个文件。
+- [analysis/hero_ipmi_probe](analysis/hero_ipmi_probe/)：13 个文件。
+- [analysis/hero_ipmi_probe_a2](analysis/hero_ipmi_probe_a2/)：8 个文件。
+- [analysis/hero_ipmi_r2](analysis/hero_ipmi_r2/)：34 个文件。
+- [analysis/hero_ipmi_r2_followup_20261108](analysis/hero_ipmi_r2_followup_20261108/)：17 个文件。
+- [analysis/hero_ipmi_r2_live_20261102](analysis/hero_ipmi_r2_live_20261102/)：6 个文件。
+- [analysis/hero_ipmi_rc3_20261104](analysis/hero_ipmi_rc3_20261104/)：90 个文件。
+- [analysis/hero_ipmi_rc3_live_20261108](analysis/hero_ipmi_rc3_live_20261108/)：5 个文件。
+- [analysis/hero_ipmi_rc5_20261108](analysis/hero_ipmi_rc5_20261108/)：7 个文件。
+- [analysis/hero_ipmi_rc5_s21s_20261108](analysis/hero_ipmi_rc5_s21s_20261108/)：8 个文件。
+- [analysis/hero_ipmi_rc5_s22_20261108](analysis/hero_ipmi_rc5_s22_20261108/)：5 个文件。
+- [analysis/hero_ipmi_rc5_s23_20261108](analysis/hero_ipmi_rc5_s23_20261108/)：6 个文件。
+- [analysis/hero_ipmi_sectionfix_20261108](analysis/hero_ipmi_sectionfix_20261108/)：2 个文件。
+- [analysis/hero_ipmi_sel_decode_20261108](analysis/hero_ipmi_sel_decode_20261108/)：11 个文件。
+- [analysis/hero_ipmi_setup_m1](analysis/hero_ipmi_setup_m1/)：27 个文件。
+- [analysis/hero_ipmi_setup_m1a](analysis/hero_ipmi_setup_m1a/)：26 个文件。
+- [analysis/hero_ipmi_setup_m1b](analysis/hero_ipmi_setup_m1b/)：9 个文件。
+- [analysis/hero_p6_a1_diagnostic_20261108](analysis/hero_p6_a1_diagnostic_20261108/)：36 个文件。
+- [analysis/hero_p6_afterboot_hang_review_20261108](analysis/hero_p6_afterboot_hang_review_20261108/)：9 个文件。
+- [analysis/hero_p6_afterboot_sync_design_20261108](analysis/hero_p6_afterboot_sync_design_20261108/)：1 个文件。
+- [analysis/hero_p6_native_refresh_review_20261108](analysis/hero_p6_native_refresh_review_20261108/)：7 个文件。
+- [analysis/hero_p6_ramcheck15_s22_20261108](analysis/hero_p6_ramcheck15_s22_20261108/)：28 个文件。
+- [analysis/hero_p6_ramcheck15_s23_20261108](analysis/hero_p6_ramcheck15_s23_20261108/)：27 个文件。
+- [analysis/hero_p6_ramcheck2_20261108](analysis/hero_p6_ramcheck2_20261108/)：29 个文件。
+- [analysis/hero_p6_ramcheck3_20261108](analysis/hero_p6_ramcheck3_20261108/)：28 个文件。
+- [analysis/hero_p6_ramcheck4_20261108](analysis/hero_p6_ramcheck4_20261108/)：27 个文件。
+- [analysis/hero_p6_ramcheck_20261108](analysis/hero_p6_ramcheck_20261108/)：27 个文件。
+- [analysis/hero_p6_s21r_independent_review_20261108](analysis/hero_p6_s21r_independent_review_20261108/)：2 个文件。
+- [analysis/hero_p6_s21s_independent_review_20261108](analysis/hero_p6_s21s_independent_review_20261108/)：2 个文件。
+- [analysis/hero_p6_s22_20261108](analysis/hero_p6_s22_20261108/)：27 个文件。
+- [analysis/hero_p6_s23_20261108](analysis/hero_p6_s23_20261108/)：31 个文件。
+- [analysis/hero_p6_s23_independent_review_20261108](analysis/hero_p6_s23_independent_review_20261108/)：2 个文件。
+- [analysis/hero_p6_settings21_20261108](analysis/hero_p6_settings21_20261108/)：23 个文件。
+- [analysis/hero_p6_settings21r_20261108](analysis/hero_p6_settings21r_20261108/)：24 个文件。
+- [analysis/hero_p6_settings21s_20261108](analysis/hero_p6_settings21s_20261108/)：24 个文件。
+- [analysis/hero_pcie_catalog_20261108](analysis/hero_pcie_catalog_20261108/)：11 个文件。
+- [analysis/hero_pcie_collect_i4_20261108](analysis/hero_pcie_collect_i4_20261108/)：28 个文件。
+- [analysis/hero_r3_autoboot_test_20261108](analysis/hero_r3_autoboot_test_20261108/)：19 个文件。
+- [analysis/hero_rc5_independent_review_20261108](analysis/hero_rc5_independent_review_20261108/)：12 个文件。
+- [analysis/hero_rc5_r4_s21_independent_review_20261108](analysis/hero_rc5_r4_s21_independent_review_20261108/)：7 个文件。
+- [analysis/hero_rc5_r4_s21r_independent_review_20261108](analysis/hero_rc5_r4_s21r_independent_review_20261108/)：7 个文件。
+- [analysis/hero_rc5_r4_s21s_independent_review_20261108](analysis/hero_rc5_r4_s21s_independent_review_20261108/)：10 个文件。
+- [analysis/hero_rc5_r5_s22_independent_review_20261108](analysis/hero_rc5_r5_s22_independent_review_20261108/)：10 个文件。
+- [analysis/hero_rc5_r5_s23_independent_review_20261108](analysis/hero_rc5_r5_s23_independent_review_20261108/)：10 个文件。
+- [analysis/hero_rea_20261102](analysis/hero_rea_20261102/)：19 个文件。
+- [analysis/hero_remote_bios_r3](analysis/hero_remote_bios_r3/)：49 个文件。
+- [analysis/hero_remote_bios_r3_live_20261102](analysis/hero_remote_bios_r3_live_20261102/)：3 个文件。
+- [analysis/hero_remote_bios_r4](analysis/hero_remote_bios_r4/)：27 个文件。
+- [analysis/hero_remote_bios_r4_live_20261102](analysis/hero_remote_bios_r4_live_20261102/)：3 个文件。
+- [analysis/hero_remote_bios_r5](analysis/hero_remote_bios_r5/)：23 个文件。
+- [analysis/hero_remote_bios_r5_live_20261102](analysis/hero_remote_bios_r5_live_20261102/)：3 个文件。
+- [analysis/hero_remote_bios_r6](analysis/hero_remote_bios_r6/)：114 个文件。
+- [analysis/hero_remote_bios_r6_live_20261103](analysis/hero_remote_bios_r6_live_20261103/)：3 个文件。
+- [analysis/hero_remote_bios_r7](analysis/hero_remote_bios_r7/)：56 个文件。
+- [analysis/hero_remote_bios_r7_live_20261103](analysis/hero_remote_bios_r7_live_20261103/)：3 个文件。
+- [analysis/hero_remote_bios_r8](analysis/hero_remote_bios_r8/)：58 个文件。
+- [analysis/hero_remote_bios_r8_live_20261103](analysis/hero_remote_bios_r8_live_20261103/)：3 个文件。
+- [analysis/hero_sensor_r1](analysis/hero_sensor_r1/)：2 个文件。
+- [analysis/hero_sensor_r3_20261108](analysis/hero_sensor_r3_20261108/)：24 个文件。
+- [analysis/hero_sensor_r4_20261108](analysis/hero_sensor_r4_20261108/)：46 个文件。
+- [analysis/hero_sensor_r5_20261108](analysis/hero_sensor_r5_20261108/)：59 个文件。
+- [analysis/package_hero_ipmi_fan_b2.py](analysis/package_hero_ipmi_fan_b2.py)
+- [analysis/package_hero_ipmi_fan_b2a.py](analysis/package_hero_ipmi_fan_b2a.py)
+- [analysis/package_hero_ipmi_fan_b2b.py](analysis/package_hero_ipmi_fan_b2b.py)
+- [analysis/package_hero_ipmi_fan_b2c.py](analysis/package_hero_ipmi_fan_b2c.py)
+- [analysis/package_hero_ipmi_init_b1.py](analysis/package_hero_ipmi_init_b1.py)
+- [analysis/package_hero_ipmi_probe.py](analysis/package_hero_ipmi_probe.py)
+- [analysis/package_hero_ipmi_probe_a2.py](analysis/package_hero_ipmi_probe_a2.py)
+- [analysis/package_sensor_r1.py](analysis/package_sensor_r1.py)
+- [analysis/structures](analysis/structures/)：1 个文件。
+- [analysis/verify_hero_b2c_recovery.py](analysis/verify_hero_b2c_recovery.py)
+- [analysis/verify_hero_ipmi_fan_b2.py](analysis/verify_hero_ipmi_fan_b2.py)
+- [analysis/verify_hero_ipmi_fan_b2a.py](analysis/verify_hero_ipmi_fan_b2a.py)
+- [analysis/verify_hero_ipmi_fan_b2b.py](analysis/verify_hero_ipmi_fan_b2b.py)
+- [analysis/verify_hero_ipmi_fan_b2c.py](analysis/verify_hero_ipmi_fan_b2c.py)
+- [analysis/verify_hero_ipmi_init_b1.py](analysis/verify_hero_ipmi_init_b1.py)
+- [analysis/verify_hero_ipmi_probe.py](analysis/verify_hero_ipmi_probe.py)
+- [analysis/verify_hero_ipmi_probe_a2.py](analysis/verify_hero_ipmi_probe_a2.py)
+- [analysis/verify_sensor_r1.py](analysis/verify_sensor_r1.py)
+
+## 目录与构建
+
+为分类浏览，原始源码放在当前板型目录下。构建脚本中的原始相对路径未作批量改写。使用仓库根目录的 `restore-source-layout.py` 可按清单恢复原 `analysis/` 布局；所需固件、第三方工具和被排除文件仍须从本地完整工程补齐。

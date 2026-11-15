@@ -1,13 +1,28 @@
-# BIOS research and build sources
+# BIOS 工程与分析源码
 
-Source snapshot of local BIOS research projects, including HERO IPMI and Ai Tweaker work for multiple ASUS workstation and desktop boards.
+涉及 5 种主板：4 条开发工程线，加 1 条 ProArt / Creator 供体参考线。这里保存 BIOS 研究与构建源码。
 
-## Status and scope
+**[查看全部工程线、功能分支与版本关系](PROJECTS.md)**
 
-These are research and experimental build sources, not official ASUS firmware. A newer candidate is not necessarily validated or suitable for flashing. The HERO RC5 R5/S23 CANDIDATE05 records state that final firmware flashing, cold Setup entry, configuration persistence and recovery acceptance are not yet verified.
+| 工程 | 内容 | 状态 |
+|---|---|---|
+| [Z790 HERO](Z790-HERO/) | IPMI、R5/S23、远程 BIOS、库存与 PCIe | 含离线候选，最终刷写与恢复验收未全部完成 |
+| [W790 ACE](W790-ACE/) | Ai Tweaker 密码锁、1904 适配与构建 | 多版本研究及验证源码，须核对实机记录 |
+| [W790E SAGE SE](W790E-SAGE-SE/) | 密码锁、原生提供者、安装器与诊断 | 包含实验候选、模拟及独立审查 |
+| [W890E SAGE SE](W890E-SAGE-SE/) | 诊断、密码运行时、恢复与回调 | 部分分析及实验适配 |
 
-The original `analysis/` directory layout is preserved. This snapshot intentionally omits firmware images, generated binaries, third-party tools, build caches, raw hardware logs and local configuration. Text files flagged for possible credentials or local network details are also omitted pending manual review. Some scripts require those separately retained local inputs; this repository alone is not a complete runnable firmware toolchain.
+[共用源码](shared/) · [ProArt / Creator 参考资料](references/)
 
-`SOURCE-MANIFEST.json` records SHA-256 hashes of the included source files. The complete original project is retained locally pending archival and cleanup approval.
+## 分类和来源
 
-No license is granted for third-party materials. No ASUS signature or hardware compatibility claim is made.
+源码按原工程目录归属分类，内容保持原样。`SOURCE-MANIFEST.json` 记录分类路径、原始路径和 SHA-256；没有把同一源码复制到多个板型中。跨板型的公共探针和工具放在 `shared/`。
+
+分类目录用于浏览。构建前可运行 `python restore-source-layout.py --output ../BIOS-source-restored`，恢复原来的 `analysis/` 布局。恢复只包含本仓库中已公开的源码；固件输入、第三方工具和被排除的私有文件须从保留的完整本地工程补齐。
+
+## 收录边界
+
+公开源码快照不包含完整固件镜像、生成二进制、第三方工具、构建缓存、原始实机日志和本地配置。自动检查发现的疑似凭据、私钥内容、内网地址及部分大文本已排除；这不是完整可直接运行的固件工具链。
+
+版本编号较新不代表已经验证可用。HERO R5/S23 CANDIDATE05 的原始记录尚未确认最终 CAP 刷写、冷启动菜单进入、配置写入和恢复验收。W890 仅标记为部分分析，不能据此声称完成整体适配。
+
+第三方材料的权利归其原作者。本仓库不授予第三方材料许可，不声明 ASUS 签名或硬件兼容性。
