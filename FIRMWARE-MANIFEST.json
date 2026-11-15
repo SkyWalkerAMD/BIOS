@@ -1,0 +1,67 @@
+[
+  {
+    "board": "Z790-HERO",
+    "version": "3107 / RC5 R5 S23 CANDIDATE05",
+    "filename": "HERO-3107-IPMI-RC5-IPMI-ONLY-R5-S23-CANDIDATE05-UNSIGNED.CAP",
+    "bytes": 33558528,
+    "sha256": "68cfc48a76d41f23edf093984818b64a6b13a686956666339733fe0a84e287f9",
+    "status": "实验固件候选；最终 CAP 刷写、冷启动菜单、F10 写入和官方恢复均未完成验收。",
+    "original_path": "analysis/hero_ipmi_rc5_s23_20261108/RC5-IPMI-ONLY-R5-S23-CANDIDATE05/HERO-3107-IPMI-RC5-IPMI-ONLY-R5-S23-CANDIDATE05-UNSIGNED.CAP",
+    "baseline_sha256": "e900f164cbabec0088ea8f1dd3c0ad932f32a5e14412be814d06cce3a4210f6a",
+    "asset": "Z790-HERO-latest-local-progress.zip",
+    "asset_bytes": 14358806,
+    "asset_sha256": "96ffdfc9fb86f26429c7ac91c1b5010d9c05f8131e8e0eeba324f56145117ee9"
+  },
+  {
+    "board": "W790-ACE",
+    "version": "1904 / CANDIDATE05",
+    "filename": "W790-ACE-1904-CANDIDATE05-ENGINEERING-NONOEM-NOT-FLASH-READY.CAP",
+    "bytes": 67112960,
+    "sha256": "e330039ecd2c334c4f9d502589e7f9503000b34462a7e21f6b97b1b581794d08",
+    "status": "工程签名、非 OEM、NOT FLASH READY；本地数学验签不等于厂商更新接受或可恢复刷写。",
+    "original_path": "analysis/aitweaker_lock/ace_adaptation_20261108/flash_candidate05/engineering_signature/W790-ACE-1904-CANDIDATE05-ENGINEERING-NONOEM-NOT-FLASH-READY.CAP",
+    "baseline_sha256": "03e4330430b2510d5e9e5c9868ca64c730844992b82c6a272b815aef3d20bf29",
+    "asset": "W790-ACE-latest-local-progress.zip",
+    "asset_bytes": 15682922,
+    "asset_sha256": "20b38479c900354d3902589b3f84745f14d3f8865ce73da7087a45ca88485fe1"
+  },
+  {
+    "board": "W790E-SAGE-SE",
+    "version": "1904 / NATIVE12",
+    "filename": "W790E-SAGE-SE-1904-NATIVE12-INTERNAL-UNSIGNED-NOT-RELEASE-READY.review.bin",
+    "bytes": 67112960,
+    "sha256": "b1223ca05cf9630382e5fc014457d3c6343aaf7d970b58e5769950200f65ac02",
+    "status": "最新已找到的完整集成审查镜像，INTERNAL / UNSIGNED / NOT RELEASE READY；NATIVE13 等更新源码属于后续组件和安装器进展，不是新的完整 BIOS 交付。",
+    "original_path": "analysis/aitweaker_lock/lock_sage_1904/review/flash_readiness/native12_safety_review/implementation/build/integration_native12_review/W790E-SAGE-SE-1904-NATIVE12-INTERNAL-UNSIGNED-NOT-RELEASE-READY.review.bin",
+    "baseline_sha256": "aba26bf927de341f1859dd6b5f35645564d5aea104fb26bcc7b5a98bcd96b0b3",
+    "asset": "W790E-SAGE-SE-latest-local-progress.zip",
+    "asset_bytes": 15774348,
+    "asset_sha256": "79bd7108f527288c7033206c46755c25e76ae46ff85ea3042f16f757e5542857"
+  },
+  {
+    "board": "W890E-SAGE-SE",
+    "version": "0603 / 原厂分析基线",
+    "filename": "Pro-WS-W890E-SAGE-SE-ASUS-0603.CAP",
+    "bytes": 67112960,
+    "sha256": "c7b12934cd0904a9cd4cfca53f656931bd5164e3bc30b99b043c2c2cb39a92d1",
+    "status": "本地保存的原厂分析基线；项目仍为部分分析，没有已完成的修改版 BIOS。不声称这是厂商当前在线最新版本。",
+    "original_path": "analysis/workstation_20261008/W890_SAGE_0603/Pro-WS-W890E-SAGE-SE-ASUS-0603.CAP",
+    "baseline_sha256": "c7b12934cd0904a9cd4cfca53f656931bd5164e3bc30b99b043c2c2cb39a92d1",
+    "asset": "W890E-SAGE-SE-latest-local-progress.zip",
+    "asset_bytes": 15709264,
+    "asset_sha256": "3cbc2709f8e3869d65b0432fe1eefd97f185f3b9b674e5c5336580afe326128b"
+  },
+  {
+    "board": "ProArt-Z790-CREATOR-WIFI",
+    "version": "IPMI 3002 / 供体参考基线",
+    "filename": "ProArt-Z790-CREATOR-WIFI-ASUS-IPMI-3002.CAP",
+    "bytes": 33558528,
+    "sha256": "4545835f46e6b499a19f4ea73a21f2aa6baf61b6bbed5118bd56cf51cdeea205",
+    "status": "本地保存的 IPMI 供体参考固件，不属于独立修改版交付。不声称这是厂商当前在线最新版本。",
+    "original_path": "ProArt-Z790-CREATOR-WIFI-ASUS-IPMI-3002.CAP",
+    "baseline_sha256": "4545835f46e6b499a19f4ea73a21f2aa6baf61b6bbed5118bd56cf51cdeea205",
+    "asset": "ProArt-Z790-CREATOR-WIFI-latest-local-progress.zip",
+    "asset_bytes": 12855952,
+    "asset_sha256": "8444c85205e72f2c62d312e5a4cbf088cd1f8d46f6a440e4c34b2ffa74650f6e"
+  }
+]
