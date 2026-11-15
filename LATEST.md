@@ -1,5 +1,7 @@
 # 最新 BIOS 与测试进展
 
+**发布状态：** 前五份镜像包已发布；测试组件补充包及 ACE USB 主线替换包正在等待具体公开内容批准。现存 Release 中同名 ACE 包仍是旧 e330 工程签名文件，不是本页所述 9b038 USB 主候选。
+
 本页收录本地最新完整镜像和仍在测试的组件。实验候选、NOFLASH、UNBOUND、TESTONLY、TCG-ONLY 均保持明确标记。
 
 ## 完整镜像与参考基线
@@ -7,14 +9,14 @@
 | 工程 | 版本 | 下载 | 状态 |
 |---|---|---|---|
 | Z790-HERO | 3107 / RC5 R5 S23 CANDIDATE05 | [下载](https://github.com/SkyWalkerAMD/BIOS/releases/download/local-bios-progress-20261115/Z790-HERO-latest-local-progress.zip) | 实验固件候选；最终 CAP 刷写、冷启动菜单、F10 写入和官方恢复均未完成验收。 |
-| W790-ACE | 1904 / CANDIDATE05 / USB FlashBack 当前主线 | [下载](https://github.com/SkyWalkerAMD/BIOS/releases/download/local-bios-progress-20261115/W790-ACE-latest-local-progress.zip) | 当前 USB FlashBack 实验候选；最终接受、原生 Setup 整体运行和可恢复刷写尚未完成验收。旧 e330 工程签名文件不是默认候选。 |
+| W790-ACE | 1904 / CANDIDATE05 / USB FlashBack 当前主线 | 待批准上传，暂不提供此更新包下载 | 当前 USB FlashBack 实验候选；最终接受、原生 Setup 整体运行和可恢复刷写尚未完成验收。旧 e330 工程签名文件不是默认候选。 |
 | W790E-SAGE-SE | 1904 / NATIVE12 | [下载](https://github.com/SkyWalkerAMD/BIOS/releases/download/local-bios-progress-20261115/W790E-SAGE-SE-latest-local-progress.zip) | 最新已找到的完整集成审查镜像，INTERNAL / UNSIGNED / NOT RELEASE READY；NATIVE13 等更新源码属于后续组件和安装器进展，不是新的完整 BIOS 交付。 |
 | W890E-SAGE-SE | 0603 / 原厂分析基线 | [下载](https://github.com/SkyWalkerAMD/BIOS/releases/download/local-bios-progress-20261115/W890E-SAGE-SE-latest-local-progress.zip) | 本地保存的原厂分析基线；项目仍为部分分析，没有已完成的修改版 BIOS。不声称这是厂商当前在线最新版本。 |
 | ProArt-Z790-CREATOR-WIFI | IPMI 3002 / 供体参考基线 | [下载](https://github.com/SkyWalkerAMD/BIOS/releases/download/local-bios-progress-20261115/ProArt-Z790-CREATOR-WIFI-latest-local-progress.zip) | 本地保存的 IPMI 供体参考固件，不属于独立修改版交付。不声称这是厂商当前在线最新版本。 |
 
 ## 最新测试组件
 
-[下载最新测试组件与对应源码](https://github.com/SkyWalkerAMD/BIOS/releases/download/local-bios-progress-20261115/BIOS-latest-test-components.zip)
+测试组件与对应源码压缩包已在本地准备，待批准公开。相关源码已在各主板目录公开。
 
 包内包含 11 个二进制／启动介质和 2,465 个此前已公开的相关源码文件。它们不是 11 份完整 BIOS。
 
