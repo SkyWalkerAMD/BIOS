@@ -1,0 +1,36 @@
+"""Independent seven-PNG decoding and bounded read-only hardware review."""
+from pathlib import Path
+import hashlib,json,re,zlib
+from decode_probe import decode
+HERE=Path(__file__).resolve().parent;CASE=HERE.parents[2];P12=HERE.parent/'native_provider12_candidate';N12=HERE.parent/'native12_safety_review'
+CAPTURE=CASE/'remote_172_20_2_162/hardware-native12-preflight-1793692872117'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+frozen=HERE/'preflight_manifest.json';manifest=json.loads(frozen.read_text());manifest_hash=sha(frozen)
+def frozen_ok():
+    assert sha(frozen)==manifest_hash
+    for a in manifest['artifacts']:assert sha(HERE/a['path'])==a['sha256'],a['path']
+frozen_ok()
+images=[CAPTURE/f'page-{n:02}.png'for n in range(1,8)]
+data,meta=decode(images);assert len(data)==5075 and meta['crc32']=='E51AB9FA'and meta['sha256']=='a6918841b5640347e2f139e46b37981a5fd2ea30ae860b4f2eecfe5c1090e9b7'
+assert data==(CAPTURE/'hardware-log.txt').read_bytes()
+OUT=HERE/'hardware_readonly';OUT.mkdir(exist_ok=True);(OUT/'independently-decoded.log').write_bytes(data)
+text=data.decode('ascii');modules=[];patches=re.findall(r'^PATCH (\S+) RVA=([0-9A-F]{16}) (\S+)\r?$',text,re.M)
+assert len(patches)==12 and all(p[2]=='ORIGINAL_OK'for p in patches)
+for name,base,old,new,want_pages in [('AMITSE',0x60fa5000,0xa1f40,0xa6020,5),('Setup',0x611db000,0x1a5ca0,0x1a93c0,4)]:
+    start=text.index('MODULE '+name+'\r\n');end=text.find('MODULE ',start+1);block=text[start:end if end!=-1 else len(text)]
+    def field(label):return int(re.search(r'^'+re.escape(label)+r'=([0-9A-F]{16})\r?$',block,re.M).group(1),16)
+    assert field('Count')==1 and field('Base')==base and field('LoadedSize')==old and field('NewImageSizeRequired')==new
+    assert'PASS original relocation-free text SHA256'in block
+    pages=re.findall(r'^EXTENSION_PAGE_NO_CONTENT_READ ([0-9A-F]{16}) TYPE=([0-9A-F]{16}) MAP_ATTR=([0-9A-F]{16}) ACTUAL_ATTR=(\S+)\r?$',block,re.M)
+    first=(base+old+4095)&~4095;expected=[first+4096*i for i in range(want_pages)]
+    assert len(pages)==want_pages and[int(p[0],16)for p in pages]==expected and all(int(p[1],16)==3 and int(p[2],16)==15 and p[3]=='UNKNOWN'for p in pages)
+    modules.append({'name':name,'base':hex(base),'original_image_size':hex(old),'requested_native12_image_size':hex(new),'original_text_sha256_matched':True,'undeclared_tail_bytes':field('UndeclaredAllocationTailBytes'),'extension_pages':[{'address':p[0],'memory_type':int(p[1],16),'type_name':'EfiBootServicesCode','map_attributes':p[2],'actual_permissions':p[3]}for p in pages],'extension_available_as_conventional_memory':False,'extension_owned_by_probe':False})
+assert'PASS SMBIOS W790E-SAGE SE version1904'in text and'PASS original SendForm pointer identity only'in text and'PASS exactly one original Setup HII interface'in text
+assert'AMITSE.stage=0000000000000007'in text and'AMITSE.app_pointer=0000000000000000'in text
+alternatives=json.loads((HERE/'ram_alternatives_verification.json').read_text());assert alternatives['case_count']==7
+review={'status':'INDEPENDENT_HARDWARE_READONLY_DECODE_PASS_DIRECT_RAM_APPEND_UNAVAILABLE','input_capture_directory':str(CAPTURE),'decode':meta,'decoded_bytes_equal_parent_log':True,'decoded_output':str(OUT/'independently-decoded.log'),'png_sources':[{'path':str(p),'bytes':p.stat().st_size,'sha256':sha(p)}for p in images],'module_identity':modules,'patches':[{'name':a,'rva':b,'result':c}for a,b,c in patches],'sendform_pointer_identity':True,'one_original_setup_hii_interface':True,'memory_attribute_protocol':'unavailable','actual_page_permissions':'unknown','amtise_stage':7,'amtise_app_pointer':0,'native_browser_inactive_proof':False,'probe_installer_present':False,'provider_started':False,'log_complete':True,'log_overflow':False,'runtime_table_changed_by_probe':False,'no_variable_flash_or_disk_write_implementation_in_probe':True,'warnings':0,
+ 'conclusion':{'same_N12_P12_in_place_append':'NOT_SAFE_TO_INSTALL_IN_OBSERVED_BOOT_LAYOUT','reason':'All nine needed extension pages are EfiBootServicesCode, not free ConventionalMemory or pages allocated to this application. Descriptor type does not identify their owning allocation; no ownership transfer was attempted. Writing or freeing them would risk live boot-service code.','unknowns':['Real page-table permissions','Owners and liveness of adjacent EfiBootServicesCode allocations','Original-image tail ownership and PE/LoadedImage metadata mutation semantics','Proof of absent native browser frames']},
+ 'unchanged_binary_alternatives':[{'path':'Copy exact payload elsewhere','status':'REJECTED','reason':'Actual guard gate_base retains its image-relative binding and resolves to the wrong original base. Actual provider requires payload hash at fixed image-relative location and exact image sizes.'},{'path':'Load whole exact modified images as shadow copies','status':'NOT_A_SAFE_EXISTING_ROUTE','reason':'Actual provider refuses old and new duplicate FFS identities in either enumeration order. Starting original DXE entries twice or replacing existing driver handles/protocols would require a separate takeover design and initialization/cleanup review.'},{'path':'Copy code into unproven original PE slack or adjacent code pages','status':'REJECTED','reason':'No exclusive allocation, liveness or permission evidence. Relocation/binding changes would create a new candidate.'},{'path':'Remove or fake original LoadedImage identities','status':'REJECTED','reason':'Would bypass the frozen provider identity model and alter live firmware metadata; does not validate the original candidate.'}],
+ 'possible_new_architecture':{'status':'CONCEPT_ONLY_NO_INSTALLER_CREATED','description':'An independently allocated guard/state design could be researched separately, with explicit original-image base binding and a separate bounded guard allocation identity. This requires new guard/provider bytes and rebinding, native entry/return provenance, detour/trampoline relocation and range review, page permissions, real UI inactivity proof, transaction rollback, and resident-provider cleanup semantics. It cannot be reported as the frozen production N12/P12 having passed hardware UI tests.','persistent_limit':'Any no-flash RAM test lasts only for the current boot and cannot itself guarantee direct Del entry on every subsequent boot.'},
+ 'offline_counterexamples':{'report':str(HERE/'ram_alternatives_verification.json'),'sha256':sha(HERE/'ram_alternatives_verification.json'),'cases':7,'scope':alternatives['scope']},'frozen_probe_manifest':{'sha256':manifest_hash,'verified_artifacts':len(manifest['artifacts']),'unchanged':True},'sources':[{'path':str(p),'sha256':sha(p)}for p in[Path(__file__),HERE/'decode_probe.py',HERE/'verify_ram_alternatives.py',P12/'source/owner.c',P12/'source/guard_binding.h',N12/'implementation/source/gate.c',N12/'implementation/source/gate.h']],'no_remote_actions_performed_by_this_review':True}
+frozen_ok();(HERE/'hardware_readonly_review.json').write_text(json.dumps(review,indent=2)+'\n');print(json.dumps({'status':review['status'],'hardware_review_sha256':sha(HERE/'hardware_readonly_review.json'),'png_count':len(images),'bytes':len(data),'crc32':meta['crc32'],'log_sha256':meta['sha256'],'frozen_manifest_unchanged':True}))

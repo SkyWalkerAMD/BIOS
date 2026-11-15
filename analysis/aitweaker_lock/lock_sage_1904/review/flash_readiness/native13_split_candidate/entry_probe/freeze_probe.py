@@ -1,0 +1,16 @@
+from pathlib import Path
+import hashlib,json
+HERE=Path(__file__).resolve().parent;N13=HERE.parent;OLD=HERE.parents[1]/'native12_hardware_candidate'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+old=json.loads((OLD/'preflight_manifest.json').read_text())
+for a in old['artifacts']:assert sha(OLD/a['path'])==a['sha256'],a['path']
+build=json.loads((HERE/'build/build.json').read_text());tests=json.loads((HERE/'tests/verification.json').read_text());vm=json.loads((HERE/'ovmf_report.json').read_text());run=Path(vm['run'])
+assert tests['case_count']==21 and tests['status']=='PASS_ACTUAL_CONTEXT_PROBE_BYTES_SYNTHETIC_EFI'
+assert tests['efi_sha256']==vm['efi_sha256']==build['efi_sha256']==sha(Path(build['efi']))
+assert vm['iso_sha256']==build['iso_sha256']==sha(Path(build['iso']))
+assert (run/'decoded.log').read_bytes()==(run/'probe.log').read_bytes()
+report={'status':'FROZEN_READ_ONLY_ENTRY_CONTEXT_PROBE_NOT_INSTALLER','efi_sha256':build['efi_sha256'],'iso_sha256':build['iso_sha256'],'source_sha256':sha(HERE/'source/preflight.c'),'entry_assembly_sha256':sha(HERE/'source/entry.S'),'context_inspector_sha256':sha(HERE/'source/context_inspect.inc'),'synthetic_actual_byte_cases':21,'original_startimage_frame_checks':8,'tests_sha256':sha(HERE/'tests/verification.json'),'ovmf_report_sha256':sha(HERE/'ovmf_report.json'),'ovmf_qr_roundtrip_bytes':(run/'decoded.log').stat().st_size,'ovmf_qr_roundtrip_sha256':sha(run/'decoded.log'),'baseline_frozen_manifest_sha256':sha(OLD/'preflight_manifest.json'),'baseline_artifacts_verified_unchanged':len(old['artifacts']),'browser_absence_proven':False,'installation_authorized':False,'hardware_result':None,'limitations':['Only exact original Core entry and one native parent frame can be observed.','No general stack unwind, arbitrary stack scan, OEM UI invocation or absence proof.','Current MemoryMap bounds are checked; real page-table permissions remain separate evidence.','The separately allocated N13 guard/provider architecture remains design work; no installer exists.']}
+(HERE/'entry_context_review.json').write_text(json.dumps(report,indent=2)+'\n')
+files=list((HERE/'source').rglob('*'))+list((HERE/'tests').glob('*'))+[HERE/x for x in ['prepare_probe.py','build_probe.py','verify_context_probe.py','run_ovmf_probe.py','decode_probe.py','freeze_probe.py','README.md','identity_binding.json','entry_context_review.json','ovmf_report.json','build/build.json','build/probe.map','build/SageNative13EntryContext.efi','build/SAGE-N13-READONLY-ENTRY-CONTEXT.iso','build/readonly-efiboot.img']]+[p for p in run.iterdir()if p.suffix in ['.png','.ppm','.json','.log']]+[N13/x for x in ['FEASIBILITY.md','inspect_boot_context.py','boot_context_audit.json','verify_startimage_frame.py','startimage_frame_verification.json']]+list((N13/'boot_context').glob('*'))
+manifest={'status':report['status'],'artifacts':[{'path':str(p.relative_to(N13)),'bytes':p.stat().st_size,'sha256':sha(p)}for p in sorted(set(files))if p.is_file()]}
+(HERE/'entry_context_manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print(json.dumps({'manifest_sha256':sha(HERE/'entry_context_manifest.json'),'review_sha256':sha(HERE/'entry_context_review.json'),'artifacts':len(manifest['artifacts'])}))

@@ -1,0 +1,229 @@
+/* Ai Tweaker interface probe P1. NOT a password lock or a BIOS image.
+ * Enumerates loaded images and UEFI HII interfaces, reads package metadata.
+ * Writes only a new log on its own marked boot volume. No NVRAM writes,
+ * flashing, password-variable reads, private calls, or runtime hooks. */
+#include "efi_min.h"
+#include "probe_core.h"
+#include "profiles.h"
+static GUID loaded_guid={0x5b1b31a1,0x9562,0x11d2,{0x8e,0x3f,0x00,0xa0,0xc9,0x69,0x72,0x3b}};
+static GUID fs_guid={0x964e5b22,0x6459,0x11d2,{0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b}};
+static GUID hii_guid={0xef9fc172,0xa1b2,0x4693,{0xb3,0x27,0x6d,0x32,0xfc,0x41,0x60,0x42}};
+static GUID browser_guid={0xb9d4c360,0xbcfb,0x4f9b,{0x92,0x98,0x53,0xc1,0x36,0x98,0x22,0x58}};
+static GUID config_guid={0x330d4706,0xf2a0,0x4e4f,{0xa3,0x69,0xb6,0x6f,0xa8,0xd5,0x43,0x85}};
+static GUID post_guid={0x8a91b1e1,0x56c7,0x4adc,{0xab,0xeb,0x1c,0x2c,0xa1,0x72,0x9e,0xff}};
+static GUID tse_guid={0xb1da0adf,0x4f77,0x4070,{0xa8,0x8e,0xbf,0xfe,0x1c,0x60,0x52,0x9a}};
+static GUID setup_guid={0x899407d7,0x99fe,0x43d8,{0x9a,0x21,0x79,0xec,0x32,0x8c,0xac,0x21}};
+static ST *st;
+static HANDLE *images;
+static UN image_count;
+static char logbuf[65536];
+static size_t loglen;
+static int truncated;
+static const char marker[]="AITWEAKER-PROBE-P1\r\n";
+void *memset(void *p,int c,size_t n) { uint8_t *a=p;while(n--)*a++=(uint8_t)c;return p; }
+void *memcpy(void *p,const void *q,size_t n) { uint8_t *a=p;const uint8_t *b=q;while(n--)*a++=*b++;return p; }
+static int equal(const void *p,const void *q,size_t n) {
+    const uint8_t *a=p,*b=q;while(n--)if(*a++!=*b++)return 0;return 1;
+}
+static void screen(const char *s) {
+    C16 w[160];size_t n=0;
+    if (!st->out || !st->out->out)return;
+    while(*s) {
+        w[n++]=(uint8_t)*s++;
+        if(n==159 || !*s) { w[n]=0;st->out->out(st->out,w);n=0; }
+    }
+}
+static void emit(const char *s) {
+    while(*s) { if(loglen<sizeof(logbuf))logbuf[loglen++]=*s;else truncated=1;s++; }
+}
+static void hex(uint64_t n,unsigned digits) {
+    static const char h[]="0123456789ABCDEF";char b[17];
+    if(digits>16)digits=16;
+    for(unsigned i=0;i<digits;i++)b[i]=h[(n>>((digits-i-1)*4))&15];
+    b[digits]=0;emit(b);
+}
+static void number(uint64_t n) {
+    char b[24];unsigned k=23;b[k]=0;
+    do { b[--k]=(char)('0'+n%10);n/=10; }while(n);
+    emit(b+k);
+}
+static void status(const char *s,ES e) { emit(s);emit("=0x");hex(e,16);emit("\r\n"); }
+static void guid_text(const GUID *g) {
+    hex(g->a,8);emit("-");hex(g->b,4);emit("-");hex(g->c,4);emit("-");
+    for(unsigned k=0;k<8;k++) { if(k==2)emit("-");hex(g->d[k],2); }
+}
+static int fv_guid(LOADED *li,GUID *g) {
+    const uint8_t *p=li->filepath;
+    if(!p)return 0;
+    for(size_t pos=0;pos+4<=1024;) {
+        uint16_t n=(uint16_t)(p[pos+2]|((uint16_t)p[pos+3]<<8));
+        if(n<4 || n>1024-pos || p[pos]==0x7f)return 0;
+        if(p[pos]==4 && p[pos+1]==6 && n==20) { memcpy(g,p+pos+4,16);return 1; }
+        pos+=n;
+    }
+    return 0;
+}
+static LOADED *loaded(HANDLE h) {
+    LOADED *li=0;
+    if(FAILED(st->bs->handle_protocol(h,&loaded_guid,(void **)&li)))return 0;
+    return li;
+}
+static void owner(const char *label,void *fn) {
+    emit(label);emit(" ");
+    if(!fn) { emit("NULL\r\n");return; }
+    for(UN k=0;k<image_count;k++) {
+        LOADED *li=loaded(images[k]);
+        if(!li || !li->image_base)continue;
+        UN addr=(UN)fn,base=(UN)li->image_base;
+        if(addr<base || addr-base>=li->image_size)continue;
+        GUID g;
+        if(fv_guid(li,&g))guid_text(&g);else emit("NON_FV_IMAGE");
+        emit(" RVA=0x");hex(addr-base,8);emit("\r\n");return;
+    }
+    emit("OWNER_NOT_RESOLVED\r\n");
+}
+static void inspect_images(void) {
+    ES e=st->bs->locate_handles(2,&loaded_guid,0,&image_count,&images);
+    status("LoadedImage.enumerate",e);
+    if(FAILED(e)||!images||image_count>4096) {
+        if(images)st->bs->free_pool(images);
+        images=0;image_count=0;return;
+    }
+    emit("LoadedImage.count=");number(image_count);emit("\r\n");
+    unsigned matched=0;
+    for(UN k=0;k<image_count;k++) {
+        LOADED *li=loaded(images[k]);GUID g;
+        if(!li || !fv_guid(li,&g))continue;
+        if(!equal(&g,&tse_guid,16)&&!equal(&g,&setup_guid,16))continue;
+        matched++;
+        emit(equal(&g,&tse_guid,16)?"AMITSE ":"Setup ");
+        IMAGE_INFO info;
+        if(!probe_image(li->image_base,(size_t)li->image_size,&info)) {
+            emit("IMAGE_PARSE_FAILED\r\n");continue;
+        }
+        emit("text_crc32=0x");hex(info.text_crc,8);
+        emit(" text_rva=0x");hex(info.text_rva,8);
+        emit(" text_size=0x");hex(info.text_size,8);
+        emit(" entry=0x");hex(info.entry,8);emit("\r\n");
+        const char *name="UNKNOWN_BUILD";
+        for(unsigned i=0;i<sizeof(profiles)/sizeof(profiles[0]);i++) {
+            const PROFILE *p=&profiles[i];
+            if(equal(&g,&p->guid,16)&&info.text_crc==p->crc&&info.text_rva==p->rva&&
+               info.text_size==p->size&&info.entry==p->entry&&info.image_size==p->image_size)name=p->name;
+        }
+        emit("Build fingerprint: ");emit(name);emit("\r\n");
+    }
+    emit("Target modules found=");number(matched);emit("\r\n");
+}
+static void inspect_protocols(void) {
+    BROWSER *browser=0;void *post=0;
+    ES e=st->bs->locate_protocol(&browser_guid,0,(void **)&browser);
+    status("FormBrowser2.locate",e);
+    if(!FAILED(e)&&browser) {
+        owner("FormBrowser2.SendForm",browser->send_form);
+        owner("FormBrowser2.BrowserCallback",browser->browser_callback);
+    }
+    e=st->bs->locate_protocol(&post_guid,0,&post);
+    status("AMI.PostManager.locate",e);
+    emit("AMI.PostManager.interface=");emit(post?"PRESENT\r\n":"ABSENT\r\n");
+    /* The private AMI protocol is intentionally not dereferenced or called. */
+}
+static void inspect_hii(void) {
+    HII *hii=0;HANDLE *handles=0;UN bytes=0;
+    ES e=st->bs->locate_protocol(&hii_guid,0,(void **)&hii);
+    status("HiiDatabase.locate",e);
+    if(FAILED(e)||!hii)return;
+    e=hii->list(hii,2,0,&bytes,0);
+    if(e!=ERR(5)||!bytes||bytes>32768||bytes%sizeof(HANDLE)) { status("HiiDatabase.list_size",e);return; }
+    UN capacity=bytes;
+    e=st->bs->allocate_pool(4,capacity,(void **)&handles);
+    if(FAILED(e)||!handles) { status("HiiDatabase.allocate",e);return; }
+    e=hii->list(hii,2,0,&bytes,handles);
+    if(FAILED(e)||bytes>capacity||bytes%sizeof(HANDLE)) { status("HiiDatabase.list",e);st->bs->free_pool(handles);return; }
+    emit("HII form-package handles=");number(bytes/sizeof(HANDLE));emit("\r\n");
+    for(UN i=0;i<bytes/sizeof(HANDLE);i++) {
+        UN size=0;uint8_t *buffer=0;
+        e=hii->export_list(hii,handles[i],&size,0);
+        if((e!=ERR(5)&&e!=ERR(9))||size<20||size>16*1024*1024) { status("HII export_size",e);continue; }
+        UN cap=size;
+        e=st->bs->allocate_pool(4,cap,(void **)&buffer);
+        if(FAILED(e)||!buffer) { status("HII allocate",e);continue; }
+        e=hii->export_list(hii,handles[i],&size,buffer);
+        if(FAILED(e)||size>cap) { status("HII export",e);st->bs->free_pool(buffer);continue; }
+        HII_INFO info;
+        if(!probe_hii(buffer,(size_t)size,&info)) {
+            emit("HII package parse failed\r\n");st->bs->free_pool(buffer);continue;
+        }
+        /* Log only structural counts and module ownership; no HII strings,
+         * question values, password buffers, or package contents are saved. */
+        emit("HII ");guid_text((GUID *)buffer);
+        emit(" forms=");number(info.forms);emit(" password_controls=");number(info.password_questions);
+        emit(" main_form_2713=");number(info.form_2713);emit(" main_form_2714=");number(info.form_2714);emit("\r\n");
+        HANDLE driver=0;
+        e=hii->get_driver(hii,handles[i],&driver);
+        if(!FAILED(e)&&driver) {
+            CONFIG *config=0;
+            e=st->bs->handle_protocol(driver,&config_guid,(void **)&config);
+            if(!FAILED(e)&&config) {
+                owner("  ConfigAccess.ExtractConfig",config->extract);
+                owner("  ConfigAccess.RouteConfig",config->route);
+                owner("  ConfigAccess.Callback",config->callback);
+            } else status("  ConfigAccess.locate",e);
+        } else status("  HII.driver",e);
+        st->bs->free_pool(buffer);
+    }
+    st->bs->free_pool(handles);
+}
+static int save_log(HANDLE image) {
+    LOADED *li=loaded(image);FS *fs=0;FILEP *root=0,*tag=0,*file=0;
+    if(!li || FAILED(st->bs->handle_protocol(li->device,&fs_guid,(void **)&fs)) || !fs)return 0;
+    if(FAILED(fs->open_volume(fs,&root))||!root)return 0;
+    ES e=root->open(root,&tag,(C16 *)L"\\AITWEAKER-PROBE.TAG",1,0);
+    if(FAILED(e)||!tag) { root->close(root);return 0; }
+    char buf[64]={0};UN n=sizeof(buf);
+    e=tag->read(tag,&n,buf);tag->close(tag);
+    if(FAILED(e)||n!=sizeof(marker)-1||!equal(buf,marker,n)) { root->close(root);return 0; }
+    int ok=0;
+    for(unsigned k=0;k<1000;k++) {
+        C16 name[]=L"\\AITWK-000.TXT";
+        name[7]=(C16)('0'+k/100);name[8]=(C16)('0'+k/10%10);name[9]=(C16)('0'+k%10);
+        e=root->open(root,&file,name,1,0);
+        if(!FAILED(e)) { if(file)file->close(file);file=0;continue; }
+        if(e!=ERR(14))break; /* An unreadable existing file is never overwritten. */
+        e=root->open(root,&file,name,0x8000000000000003ULL,0);
+        if(FAILED(e)||!file)break;
+        n=loglen;e=file->write(file,&n,logbuf);
+        ok=!FAILED(e)&&n==loglen;
+        if(FAILED(file->flush(file)))ok=0;
+        if(FAILED(file->close(file)))ok=0;
+        if(ok) {
+            screen("Saved ");
+            if(st->out&&st->out->out)st->out->out(st->out,name);
+            screen(" on the marked boot volume.\r\n");
+        }
+        break;
+    }
+    root->close(root);return ok;
+}
+ES EA efi_main(HANDLE image,ST *system_table) {
+    st=system_table;
+    if(!st||!st->bs)return ERR(2);
+    screen("Ai Tweaker interface probe P1 - read only firmware inspection\r\n");
+    screen("This is NOT a BIOS update or a working password lock.\r\n");
+    emit("AITWEAKER-PROBE-P1\r\nRead-only interface inventory. No password values collected.\r\n");
+    inspect_images();inspect_protocols();inspect_hii();
+    if(images)st->bs->free_pool(images);
+    images=0;image_count=0;
+    if(truncated) {
+        screen("Log exceeded capacity; NOT saving an incomplete report.\r\n");
+        return ERR(9);
+    }
+    emit("PROBE_COMPLETE\r\n");
+    if(!save_log(image)) {
+        screen("Could not save the log. Check the marker file and writable FAT32 USB.\r\n");
+        return ERR(7);
+    }
+    screen("Done. Returning to firmware in 3 seconds.\r\n");
+    st->bs->stall(3000000);
+    return 0;
+}

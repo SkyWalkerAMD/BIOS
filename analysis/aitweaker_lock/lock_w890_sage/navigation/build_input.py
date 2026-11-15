@@ -1,0 +1,11 @@
+from pathlib import Path
+import hashlib,json,subprocess,sys
+HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[3];OUT=HERE/'build';sys.path.insert(0,str(ROOT/'tools/pydeps'));import pefile
+registry=json.loads((HERE/'control_registry_0603.json').read_text());assert registry['original_amitse_sha256']=='43f80bf738e0b1101431b7319a8a9c0060655e708f22f5b6379620aee862e6fe'
+header='/* Generated from the original SHA-bound W890 FrameAddControl registry. */\nstatic const struct{uint16_t type;uint32_t table,input;} wi_types[]={\n'+''.join('{%d,0x%x,0x%x},\n'%(x['type'],x['vtable_rva'],x['input_rva'])for x in registry['items'])+'};\n'
+(HERE/'input_registry_data.h').write_text(header,encoding='utf8')
+ZIG=ROOT/'tools/zig-x86_64-windows-0.14.1/zig.exe';source=HERE/'input_adapter.c';obj=OUT/'input_adapter.obj';dll=OUT/'W890InputAdapter.TESTONLY.dll'
+commands=[[str(ZIG),'clang','-target','x86_64-unknown-windows-msvc','-nostdinc','-isystem',str(ZIG.parent/'lib/include'),'-std=c11','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-mno-red-zone','-Wall','-Wextra','-Werror','-DAITWK_TEST_EXPORT','-c',str(source),'-o',str(obj)],[str(ZIG),'lld-link','/dll','/noentry','/nodefaultlib','/machine:x64','/timestamp:0','/out:'+str(dll),str(obj),str(OUT/'w890_policy.obj'),str(OUT/'password_crypto.obj')]]
+for cmd in commands:subprocess.run(cmd,cwd=ROOT,check=True)
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();p=pefile.PE(str(dll));out={'status':'COMPILED_INPUT_AND_PENDING_BOUNDARIES_NOT_INSTALLABLE','sha256':sha(dll),'commands':commands,'exports':{e.name.decode():e.address for e in p.DIRECTORY_ENTRY_EXPORT.symbols},'sources':{p.name:sha(p)for p in [source,HERE/'input_adapter.h',HERE/'input_registry_data.h',HERE/'control_registry_0603.json']},'limitations':['Native scope/range/effects authority and lifecycle are external and unbound.','Pending effects proof must cover producer helper3FED4, not only current list. No such runtime proof is implemented here.','Input denial consumes the event; event kind2 uses a silent per-control check, never raises a password prompt.','No installer or bootable entrypoint.']}
+(OUT/'input_build.json').write_text(json.dumps(out,indent=2)+'\n',encoding='utf8');print(json.dumps({'status':out['status'],'sha256':out['sha256']}))

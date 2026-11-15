@@ -1,0 +1,11 @@
+# Composite physical-forms parser replay, W890E-SAGE SE 0603
+
+This local experiment combines all 13 HII instance structures observed in the earlier inventory: eight exact original FORMS packages plus the five complete Delta07 reconstructions. Two equal-content NON_FV instances remain distinct. This is a composite fixture across captures; it is not a new claim that all observations were simultaneous or that unknown executable owners are trusted.
+
+The unchanged original parser still reaches static index 379 and attempts the two-byte read at source+F4CE6 in this bounded model. The source declares only F245C bytes. The real post-Setup SPF sample agrees with the corresponding source-table constants and header fields, but does not establish the first-parser state or pool allocation ownership.
+
+Two emulator-only branch changes use strict count bounds at both loop entry and loop continuation. Twelve original-instruction contract checks cover counts 0, 1, 2 and 379 for the original, tail-only and both-comparison variants. The entry correction also removes the count-one error left by the prior tail-only experiment. These changes are not a general validator for corrupt table offsets and have not been applied to a firmware artifact.
+
+With the two changes, the original parser returns successfully for all 13 modeled instances / 391 IFR forms and produces 396 native page records. The original fixture has 13,827 controls. Adding the three existing independent-password management action definitions yields 13,830 controls, preserving every other bound control's original IFR opcode bytes and native type, including unresolved native placeholders. The three added definitions are type 27, QIDs FFD0/FFD1/FFD2, in Setup Security form 271D. Their handlers are never executed by this parser experiment.
+
+UEFI allocation, HII database, string lookup, notifications and three volatile count-variable services remain explicit models. Dynamic or unknown strings absent from the original producers return NOT_FOUND; no string content is invented. Missing ConfigAccess owner lookups also remain NOT_FOUND. The run constructs parser data only: it does not exercise full firmware startup, GUI rendering, callback permissions, password operations, updater or FlashBack acceptance. No original file, development PE, CAP or ROM is changed or created.

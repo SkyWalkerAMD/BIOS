@@ -1,0 +1,2 @@
+#define I3A_SNP_BYTES 22208u
+#define I3A_SNP_CRC32 0xda7f0808u

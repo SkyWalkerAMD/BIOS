@@ -1,0 +1,11 @@
+*.CAP
+*.cap
+*.bin
+*.rom
+*.zip
+*.7z
+*.key
+*.pem
+.env*
+__pycache__/
+*.pyc

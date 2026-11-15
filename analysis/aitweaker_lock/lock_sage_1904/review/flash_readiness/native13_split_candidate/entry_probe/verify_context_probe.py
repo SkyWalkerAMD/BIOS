@@ -1,0 +1,67 @@
+"""Actual compiled entry probe, bounded synthetic EFI/frame failure cases."""
+from pathlib import Path
+import hashlib,json,re,struct,sys
+HERE=Path(__file__).resolve().parent;N13=HERE.parent;N12=HERE.parents[1]/'native12_hardware_candidate'
+sys.dont_write_bytecode=True;sys.path.insert(0,str(N12));import verify_probe as f
+from unicorn import UC_HOOK_CODE,UC_HOOK_MEM_READ
+from unicorn.x86_const import *
+f.EFI=HERE/'build/SageNative13EntryContext.efi';f.sy={m[0]:int(m[1],16)for m in re.findall(r'^\s+\d{4}:[0-9a-f]+\s+(\S+)\s+([0-9a-f]{16})',(HERE/'build/probe.map').read_text(),re.M)}
+CORE=0x5000000;BDS=0x6000000;ROWS=[];OUT=HERE/'tests';OUT.mkdir(exist_ok=True)
+class VM(f.VM):
+ def __init__(self):
+    super().__init__();self.extra_lis={3:f.HEAP+0x7500,4:f.HEAP+0x7600};self.inventory=[1,2,3,4]
+    for h,name,base,pathaddr,g in [(3,'DxeCore',CORE,f.HEAP+0x7800,'d6a2cb7f-6a18-4e2f-b43b-9920a733700a'),(4,'BdsArch',BDS,f.HEAP+0x7900,'8f4b8f82-9b91-4028-86e6-f4db7d4c1dff')]:
+        p=f.pefile.PE(str(N13/'boot_context'/f'{name}.original.efi'));size=(p.OPTIONAL_HEADER.SizeOfImage+4095)&~4095;self.u.mem_map(base,size);p.relocate_image(base);self.w(base,p.get_memory_mapped_image());self.desc.append((3,base,size,0));li=self.extra_lis[h];self.w(li+0x20,f.q(pathaddr));self.w(li+0x40,f.q(base)+f.q(p.OPTIONAL_HEADER.SizeOfImage));self.w(pathaddr,b'\x04\x06\x14\0'+f.guid(g)+b'\x7f\xff\x04\0')
+    self.w(self.bs+0xd0,f.q(CORE+0x8720));self.before[0]=self.r(self.bs,0x178)
+    self.parent_rsp=f.STACK+0x80008;self.entry_image=0x555;self.w(f.sy['captured_entry'],struct.pack('<11Q',self.parent_rsp,0x12345,0x23456,0x34567,0x45678,0x56789,0x6789a,0x789ab,0x89abc,self.entry_image,self.st));self.w(self.parent_rsp,f.q(CORE+0x88af));self.w(self.parent_rsp+0x60,f.q(f.TSE+0xa8e6));self.w(self.parent_rsp+0x68,f.q(self.entry_image));self.w(self.parent_rsp+0x70,f.q(0x11223344));self.w(self.parent_rsp+0x78,f.q(0x55667788));self.stack_reads=[]
+    self.u.hook_add(UC_HOOK_MEM_READ,lambda u,access,a,n,v,data:self.stack_reads.append((a-self.parent_rsp,n)),begin=self.parent_rsp,end=self.parent_rsp+0xff)
+ def handle(self):
+    if self.arg(0)in getattr(self,'extra_lis',{}):self.w(self.arg(2),f.q(self.extra_lis[self.arg(0)]));return 0
+    return super().handle()
+ def run(self,name,check):
+    sp=f.STACK+0xf0008;self.w(sp,f.q(f.STOP));self.u.reg_write(UC_X86_REG_RSP,sp);self.u.reg_write(UC_X86_REG_RCX,self.st);self.u.emu_start(f.sy['collect'],f.STOP+1,count=100000000);assert self.u.reg_read(UC_X86_REG_RIP)==f.STOP
+    size=self.q(f.sy['probe_log_bytes']);raw=self.r(f.sy['probe_log'],size);log=raw.decode();assert raw.endswith(b'SAGE_NATIVE13_ENTRY_CONTEXT_END\r\n')and b'LOG_COMPLETE=YES'in raw
+    assert not self.live and not self.protected_writes and not self.outside_image_reads
+    assert self.r(self.bs,0x178)==self.before[0]and self.r(self.rt,0x88)==self.before[1]
+    allowed=set(range(0,8))|set(range(0x60,0x70))|set(range(0x78,0x80));assert all(set(range(a,a+n))<=allowed for a,n in self.stack_reads),self.stack_reads
+    assert check(log),name+'\n'+log
+    (OUT/(name+'.log')).write_bytes(raw);ROWS.append({'case':name,'passed':True,'log_sha256':hashlib.sha256(raw).hexdigest(),'log_bytes':size,'observed_stack_read_offsets':sorted({a for a,n in self.stack_reads}),'zero_oem_service_table_writes':True,'zero_outstanding_pool_buffers':True})
+def actual_entry_chain():
+    v=VM();priv=f.HEAP+0xa000;jump=f.HEAP+0xb000;oldsp=f.STACK+0xe0008;ret=f.TSE+0xa8e6;oldrbp=0x31415926
+    v.w(priv+0x20,f.q(f.sy['efi_main']));v.w(priv+0x38,f.q(v.st));v.w(priv+0xd0,struct.pack('<H',0x8664));v.w(oldsp,f.q(ret));v.u.reg_write(UC_X86_REG_RSP,oldsp);v.u.reg_write(UC_X86_REG_RBP,oldrbp);v.u.reg_write(UC_X86_REG_RCX,v.entry_image);v.u.reg_write(UC_X86_REG_RDX,0);v.u.reg_write(UC_X86_REG_R8,0)
+    reached=[]
+    def callback(u,a,n,data):
+        if a==f.sy['probe_main']:reached.append(a);u.emu_stop();return
+        value={CORE+0x7e50:priv,CORE+0x10808:jump,CORE+0x280:0,CORE+0x11258:0}[a];s=u.reg_read(UC_X86_REG_RSP);u.reg_write(UC_X86_REG_RAX,value);u.reg_write(UC_X86_REG_RIP,v.q(s));u.reg_write(UC_X86_REG_RSP,s+8)
+    for a in [CORE+0x7e50,CORE+0x10808,CORE+0x280,CORE+0x11258,f.sy['probe_main']]:v.u.hook_add(UC_HOOK_CODE,callback,begin=a,end=a)
+    v.u.emu_start(CORE+0x8720,0,count=100000);assert reached
+    capture=struct.unpack('<11Q',v.r(f.sy['captured_entry'],88));s=capture[0]
+    assert s==oldsp-0x60 and v.q(s)==CORE+0x88af and v.q(s+0x60)==ret and v.q(s+0x68)==v.entry_image and v.q(s+0x78)==oldrbp
+    assert capture[9]==v.entry_image and capture[10]==v.st and v.u.reg_read(UC_X86_REG_RSP)==s
+    ROWS.append({'case':'original_Core_StartImage_calls_actual_compiled_entry_assembly','passed':True,'saved_rsp_before_C_prologue':hex(s),'same_native_return_address_preserved':True,'captured_entry_handle_and_table':True,'scope':'Original Core prologue/call and actual probe entry shim execute; internal dependencies synthetic.'})
+def main():
+ actual_entry_chain()
+ v=VM();v.run('exact_amitse_native_parent',lambda s:'PASS exact fixed Core StartImage frame'in s and'NativeCallerModule=AMITSE'in s and'PASS exact known native StartImage callsite'in s)
+ v=VM();v.w(v.parent_rsp+0x60,f.q(BDS+0xf60b));v.run('exact_bds_native_parent',lambda s:'NativeCallerModule=BdsArch'in s and'PASS exact known native StartImage callsite'in s)
+ v=VM();v.w(CORE+0x88ac,b'\xcc');v.run('changed_core_callsite_refused',lambda s:not v.stack_reads and'WARN context module normalized complete text SHA256'in s)
+ v=VM();v.w(CORE+0x548,f.q(CORE+1));v.run('changed_core_text_relocation_refused',lambda s:not v.stack_reads and'WARN context module normalized complete text SHA256'in s)
+ v=VM();v.inventory=[1,2,4];v.run('missing_core_loadedimage_refused',lambda s:not v.stack_reads and'WARN exact DXE Core image available'in s)
+ v=VM();v.inventory=[1,2,3,3,4];v.run('duplicate_core_loadedimage_refused',lambda s:not v.stack_reads)
+ v=VM();v.w(v.extra_lis[3]+0x48,f.q(1));v.run('wrong_core_loaded_size_refused',lambda s:not v.stack_reads)
+ v=VM();v.w(v.bs+0xd0,f.q(CORE+0x8721));v.before[0]=v.r(v.bs,0x178);v.run('different_startimage_pointer_refused',lambda s:not v.stack_reads)
+ v=VM();v.w(v.parent_rsp,f.q(CORE+0x88b0));v.run('wrong_entry_return_stops_unwind',lambda s:'WARN original Core entry CALL return address'in s and all(a<8 for a,n in v.stack_reads))
+ v=VM();v.w(v.parent_rsp+0x68,f.q(0));v.run('wrong_saved_image_handle_stops_parent_read',lambda s:'WARN Core saved handle equals entry image'in s and not any(0x60<=a<0x68 or a>=0x78 for a,n in v.stack_reads))
+ v=VM();v.w(f.sy['captured_entry'],f.q(v.parent_rsp+1));v.run('unaligned_capture_refused',lambda s:not v.stack_reads)
+ v=VM();v.w(f.sy['captured_entry']+80,f.q(0));v.run('wrong_captured_system_table_refused',lambda s:not v.stack_reads)
+ for name,second_type in [('cross_page_frame_allowed',4),('cross_page_frame_second_reserved_refused',0)]:
+    v=VM();old=v.parent_rsp;v.parent_rsp=f.STACK+0x80ff8;v.w(v.parent_rsp,v.r(old,0x80));v.w(f.sy['captured_entry'],f.q(v.parent_rsp));v.desc=[row for row in v.desc if row[1]!=f.STACK];v.desc.extend([(4,f.STACK,0x81000,0),(second_type,f.STACK+0x81000,0x7f000,0)])
+    v.u.hook_add(UC_HOOK_MEM_READ,lambda u,access,a,n,value,data:v.stack_reads.append((a-v.parent_rsp,n)),begin=v.parent_rsp,end=v.parent_rsp+0xff)
+    v.run(name,lambda s:'PASS exact fixed Core StartImage frame'in s if second_type==4 else'WARN fixed Core frame within data descriptors'in s and all(a<8 for a,n in v.stack_reads))
+ for name,typ,attrs in [('reserved_stack',0,0),('conventional_stack',7,0),('read_protected_stack',4,0x2000)]:
+    v=VM();v.desc=[(typ,a,n,attrs)if a==f.STACK else(t,a,n,x)for t,a,n,x in v.desc];v.run(name,lambda s:not v.stack_reads)
+ v=VM();v.desc.append((4,v.parent_rsp&~4095,4096,0));v.run('overlapping_stack_map_refused',lambda s:not v.stack_reads)
+ v=VM();v.w(v.parent_rsp+0x60,f.q(0x77777777));v.run('unknown_native_parent_remains_unknown',lambda s:'NativeCallerModule=UNKNOWN'in s and'BROWSER_ABSENCE_PROOF=NO'in s)
+ v=VM();v.w(BDS+0x1000,b'\xcc');v.w(v.parent_rsp+0x60,f.q(BDS+0xf60b));v.run('unverified_bds_parent_not_attributed',lambda s:'NativeCallerModule=UNKNOWN'in s)
+ report={'status':'PASS_ACTUAL_CONTEXT_PROBE_BYTES_SYNTHETIC_EFI','case_count':len(ROWS),'cases':ROWS,'efi_sha256':hashlib.sha256(f.EFI.read_bytes()).hexdigest(),'source_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'baseline_fixture_sha256':hashlib.sha256((N12/'verify_probe.py').read_bytes()).hexdigest(),'scope':'Original Core-to-actual-entry-shim call plus actual collector identity/bounded-read cases. Native browser body, full boot ancestry, real page permissions and absence of active UI are not proven.'}
+ (OUT/'verification.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({'status':report['status'],'cases':len(ROWS)}))
+if __name__=='__main__':main()
